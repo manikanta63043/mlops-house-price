@@ -8,6 +8,7 @@ with open("model/house_price.pkl", "rb") as f:
 # Create a sample input with the SAME features used in training
 sample = {
     "age": [50],
+    "sex": [1],        # <-- Added missing 'sex' feature
     "bmi": [25.3],
     "bp": [80],
     "s1": [150],
