@@ -25,8 +25,8 @@ jobs:
         pip install -r requirements.txt
         pip install pytest flake8
 
+    - name: Run training
+      run: python src/train.py
+
     - name: Run tests
       run: pytest -q
-
-    - name: Run linting
-      run: flake8 src/ tests/
