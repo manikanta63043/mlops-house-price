@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_HUB_USER = 'mani789'
-        DOCKER_HUB_REPO = 'mlops-house-price'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -16,21 +11,20 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_HUB_USER}/${DOCKER_HUB_REPO}:latest")
+                    sh 'docker build -t mlops-house-price:latest .'
                 }
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Tag & Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    script {
-                        docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_USER}") {
-                            docker.image("${DOCKER_HUB_USER}/${DOCKER_HUB_REPO}:latest").push()
-                        }
-                    }
+                script {
+                    sh 'docker tag mlops-house-price:latest mani789/mlops-house-price:latest'
+                    sh 'docker login -u mani789 -p YOUR_DOCKER_HUB_PASSWORD'
+                    sh 'docker push mani789/mlops-house-price:latest'
                 }
             }
         }
     }
 }
+
