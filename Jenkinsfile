@@ -2,40 +2,33 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        DOCKERHUB_REPO = "mani789/mlops-house-price"
+        IMAGE_NAME = "mani789/mlops-house-price"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/manikanta63043/mlops-house-price.git'
+                git branch: 'main', url: 'https://github.com/manikanta63043/mlops-house-price.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh 'docker build -t mlops-house-price:latest .'
+                sh 'docker build -t $IMAGE_NAME:latest .'
+            }
+        }
+
+        stage('Login to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
         }
 
-        stage('Docker Login') {
+        stage('Push Docker Image') {
             steps {
-                script {
-                    sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
-                }
-            }
-        }
-
-        stage('Tag & Push Docker Image') {
-            steps {
-                script {
-                    sh "docker tag mlops-house-price:latest $DOCKERHUB_REPO:latest"
-                    sh "docker push $DOCKERHUB_REPO:latest"
-                }
+                sh 'docker push $IMAGE_NAME:latest'
             }
         }
     }
